@@ -16,6 +16,7 @@ import {
 
 import { useAuth } from "@/hooks/use-auth";
 import { BrandMark } from "@/components/Brand";
+import { useI18n } from "@/i18n";
 import { ArrowRight, Loader2, Mail, UserX } from "lucide-react";
 import { Suspense, useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
@@ -36,6 +37,7 @@ function resolveRedirectAfterAuth(
 
 function Auth({ redirectAfterAuth }: AuthProps = {}) {
   const { isLoading: authLoading, isAuthenticated, signIn } = useAuth();
+  const { t } = useI18n();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const redirect = resolveRedirectAfterAuth(
@@ -130,10 +132,13 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
                       <BrandMark className="size-10" />
                     </button>
                   </div>
-                  <CardTitle className="text-xl">Get Started</CardTitle>
-                  <CardDescription>
-                    Enter your email to log in or sign up
-                  </CardDescription>
+                  <CardTitle className="text-xl">{t("auth.title")}</CardTitle>
+                  <CardDescription>{t("auth.subtitle")}</CardDescription>
+                  {searchParams.get("returnTo")?.startsWith("/guide") && (
+                    <p className="mt-1 text-xs font-medium text-primary">
+                      {t("auth.guideHint")}
+                    </p>
+                  )}
                 </CardHeader>
                 <form onSubmit={handleEmailSubmit}>
                   <CardContent>
@@ -186,7 +191,7 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
                         disabled={isLoading}
                       >
                         <UserX className="mr-2 h-4 w-4" />
-                        Continue as Guest
+                        {t("auth.guest")}
                       </Button>
                     </div>
                   </CardContent>

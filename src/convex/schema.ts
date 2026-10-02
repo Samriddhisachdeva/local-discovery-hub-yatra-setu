@@ -137,6 +137,31 @@ const schema = defineSchema(
       createdAt: v.number(),
     }).index("by_target", ["targetType", "targetId"]),
 
+    // A traveller's request to a specific guide (date, party, message).
+    guideRequests: defineTable({
+      guideId: v.id("guides"),
+      travelerId: v.id("users"),
+      travelerName: v.string(),
+      guideName: v.string(),
+      destination: v.string(),
+      date: v.string(), // ISO date (YYYY-MM-DD) or "flexible"
+      days: v.number(),
+      partySize: v.number(),
+      message: v.string(),
+      contact: v.optional(v.string()),
+      status: v.union(
+        v.literal("pending"),
+        v.literal("accepted"),
+        v.literal("denied"),
+        v.literal("cancelled"),
+      ),
+      responseNote: v.optional(v.string()),
+      createdAt: v.number(),
+      respondedAt: v.optional(v.number()),
+    })
+      .index("by_guide", ["guideId", "status"])
+      .index("by_traveler", ["travelerId", "createdAt"]),
+
     // Safety reports raised by travellers against places or guides.
     reports: defineTable({
       reporterId: v.optional(v.id("users")),

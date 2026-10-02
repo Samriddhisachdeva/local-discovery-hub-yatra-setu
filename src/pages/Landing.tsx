@@ -1,4 +1,5 @@
 import { Brand } from "@/components/Brand";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import {
   AvatarChip,
   PlaceCover,
@@ -7,6 +8,7 @@ import {
 } from "@/components/app/catalog";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
+import { useI18n } from "@/i18n";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import {
@@ -33,11 +35,11 @@ const fadeUp = {
 };
 
 const NAV = [
-  { href: "#how", label: "How it works" },
-  { href: "#features", label: "Features" },
-  { href: "#locals", label: "For locals" },
-  { href: "#safety", label: "Safety" },
-];
+  { href: "#how", labelKey: "nav.how" },
+  { href: "#features", labelKey: "nav.features" },
+  { href: "#locals", labelKey: "nav.locals" },
+  { href: "#safety", labelKey: "nav.safety" },
+] as const;
 
 const STEPS = [
   {
@@ -204,6 +206,7 @@ function Section({
 
 export default function Landing() {
   const { isAuthenticated } = useAuth();
+  const { t } = useI18n();
   const navigate = useNavigate();
 
   const appHref = (path: string) =>
@@ -230,20 +233,28 @@ export default function Landing() {
                 href={item.href}
                 className="text-sm text-muted-foreground transition-colors hover:text-foreground"
               >
-                {item.label}
+                {t(item.labelKey)}
               </a>
             ))}
           </nav>
           <div className="flex items-center gap-2">
+            <LanguageSwitcher className="hidden sm:inline-flex" />
+            <Button
+              variant="ghost"
+              className="hidden sm:inline-flex"
+              onClick={() => go("/guide")}
+            >
+              {t("nav.guideLogin")}
+            </Button>
             <Button
               variant="ghost"
               className="hidden sm:inline-flex"
               onClick={() => go()}
             >
-              Sign in
+              {t("auth.signIn")}
             </Button>
             <Button onClick={() => go()}>
-              Get started
+              {t("auth.getStarted")}
               <ArrowRight className="size-4" />
             </Button>
           </div>
@@ -264,32 +275,32 @@ export default function Landing() {
           >
             <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground shadow-xs">
               <span className="size-1.5 rounded-full bg-primary" />
-              Local-first tourism · by Desi Voyagers
+              {t("hero.badge")}
             </span>
             <h1 className="mt-6 text-balance font-display text-5xl leading-[1.05] tracking-tight sm:text-6xl md:text-[4.25rem]">
-              See the place the way{" "}
-              <span className="italic text-primary">its people</span> do.
+              {t("hero.titleLead")}{" "}
+              <span className="italic text-primary">
+                {t("hero.titleAccent")}
+              </span>{" "}
+              {t("hero.titleTail")}
             </h1>
             <p className="mt-6 max-w-xl text-pretty text-base leading-7 text-muted-foreground sm:text-lg">
-              Yatra Setu is a bridge between travellers and local communities.
-              Discover lesser-known places through the people who live there,
-              plan a day-wise itinerary, and connect with verified local guides
-              — all in one platform.
+              {t("hero.subtitle")}
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <Button size="lg" onClick={() => go()}>
-                Start discovering
+                {t("hero.ctaDiscover")}
                 <ArrowRight className="size-4" />
               </Button>
               <Button size="lg" variant="outline" asChild>
-                <a href="#how">See how it works</a>
+                <a href="#how">{t("hero.ctaHow")}</a>
               </Button>
             </div>
             <ul className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground">
               {[
-                "Verified local guides",
-                "Auto-planner by days & budget",
-                "Reviews, reports & safety info",
+                t("hero.bulletGuides"),
+                t("hero.bulletPlanner"),
+                t("hero.bulletSafety"),
               ].map((item) => (
                 <li key={item} className="flex items-center gap-2">
                   <BadgeCheck className="size-4 text-primary" />
@@ -400,10 +411,10 @@ export default function Landing() {
       <Section id="how" className="border-t border-border/70 bg-muted/30">
         <motion.div {...fadeUp} className="max-w-2xl">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
-            How Yatra Setu works
+            {t("section.howEyebrow")}
           </p>
           <h2 className="mt-3 font-display text-4xl leading-tight tracking-tight sm:text-5xl">
-            Discover → Plan → Connect
+            {t("section.howTitle")}
           </h2>
           <p className="mt-4 text-base leading-7 text-muted-foreground">
             One simple loop for travellers — and a matching one for the locals
@@ -445,14 +456,14 @@ export default function Landing() {
         >
           <div className="max-w-xl">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
-              Live destinations
+              {t("section.destEyebrow")}
             </p>
             <h2 className="mt-3 font-display text-4xl tracking-tight">
-              Start with a city, find what guides skip
+              {t("section.destTitle")}
             </h2>
           </div>
           <Button variant="outline" onClick={() => go()}>
-            Browse all places
+            {t("section.destCta")}
             <ArrowRight className="size-4" />
           </Button>
         </motion.div>
@@ -496,7 +507,7 @@ export default function Landing() {
                   {dest.blurb}
                 </p>
                 <p className="mt-3 text-xs font-medium text-primary">
-                  {dest.count} local places →
+                  {t("section.destCount", { n: dest.count })}
                 </p>
               </div>
             </motion.button>
@@ -508,10 +519,10 @@ export default function Landing() {
       <Section id="features" className="border-t border-border/70 bg-muted/30">
         <motion.div {...fadeUp} className="max-w-2xl">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
-            Key features
+            {t("section.featuresEyebrow")}
           </p>
           <h2 className="mt-3 font-display text-4xl leading-tight tracking-tight sm:text-5xl">
-            Everything a destination keeps — organised
+            {t("section.featuresTitle")}
           </h2>
           <p className="mt-4 text-base leading-7 text-muted-foreground">
             Not a hotel directory, not a package catalogue. Hyperlocal
@@ -545,10 +556,10 @@ export default function Landing() {
       <Section id="locals">
         <motion.div {...fadeUp} className="max-w-2xl">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
-            A two-sided ecosystem
+            {t("section.localsEyebrow")}
           </p>
           <h2 className="mt-3 font-display text-4xl leading-tight tracking-tight sm:text-5xl">
-            Built for travellers and locals alike
+            {t("section.localsTitle")}
           </h2>
         </motion.div>
 
@@ -560,7 +571,9 @@ export default function Landing() {
             <span className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
               <Compass className="size-5" />
             </span>
-            <h3 className="mt-5 font-display text-2xl">For travellers</h3>
+            <h3 className="mt-5 font-display text-2xl">
+              {t("section.travellers")}
+            </h3>
             <ul className="mt-5 space-y-3">
               {TRAVELLER_POINTS.map((point) => (
                 <li
@@ -573,7 +586,7 @@ export default function Landing() {
               ))}
             </ul>
             <Button className="mt-7" onClick={() => go()}>
-              Plan a trip
+              {t("section.planTrip")}
               <ArrowRight className="size-4" />
             </Button>
           </motion.div>
@@ -585,7 +598,9 @@ export default function Landing() {
             <span className="flex size-11 items-center justify-center rounded-xl bg-primary/15 text-primary">
               <Users className="size-5" />
             </span>
-            <h3 className="mt-5 font-display text-2xl">For locals</h3>
+            <h3 className="mt-5 font-display text-2xl">
+              {t("section.localsSide")}
+            </h3>
             <ul className="mt-5 space-y-3">
               {LOCAL_POINTS.map((point) => (
                 <li
@@ -602,7 +617,7 @@ export default function Landing() {
               variant="outline"
               onClick={() => go("/dashboard?tab=contribute")}
             >
-              Contribute your knowledge
+              {t("section.contribute")}
               <ArrowRight className="size-4" />
             </Button>
           </motion.div>
@@ -613,15 +628,13 @@ export default function Landing() {
       <Section id="safety" className="border-t border-border/70 bg-muted/30">
         <motion.div {...fadeUp} className="max-w-2xl">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
-            Safety & verification
+            {t("section.safetyEyebrow")}
           </p>
           <h2 className="mt-3 font-display text-4xl leading-tight tracking-tight sm:text-5xl">
-            Trust is part of the product
+            {t("section.safetyTitle")}
           </h2>
           <p className="mt-4 text-base leading-7 text-muted-foreground">
-            Connecting travellers with community members only works when both
-            sides feel safe. Yatra Setu ships verification, reviews, reporting
-            and emergency information from day one.
+            {t("section.safetyBody")}
           </p>
         </motion.div>
 
@@ -660,13 +673,10 @@ export default function Landing() {
             }}
           />
           <p className="relative font-display text-3xl leading-tight sm:text-5xl">
-            Discover local. Plan better.
-            <br className="hidden sm:block" /> Connect with people.
+            {t("section.ctaTitle")}
           </p>
           <p className="relative mx-auto mt-4 max-w-xl text-sm leading-6 text-primary-foreground/80 sm:text-base">
-            Join the first version of Yatra Setu as a traveller or a local
-            contributor — and help document the places, food and traditions that
-            deserve to be seen.
+            {t("section.ctaBody")}
           </p>
           <div className="relative mt-8 flex flex-wrap items-center justify-center gap-3">
             <Button
@@ -674,7 +684,7 @@ export default function Landing() {
               className="bg-background text-foreground hover:bg-background/90"
               onClick={() => go()}
             >
-              Get started free
+              {t("section.ctaPrimary")}
               <ArrowRight className="size-4" />
             </Button>
             <Button
@@ -683,7 +693,7 @@ export default function Landing() {
               className="border-primary-foreground/30 bg-transparent text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground"
               onClick={() => go("/dashboard?tab=contribute")}
             >
-              I'm a local
+              {t("section.ctaLocal")}
             </Button>
           </div>
         </motion.div>
@@ -713,7 +723,7 @@ export default function Landing() {
                       href={item.href}
                       className="transition-colors hover:text-foreground"
                     >
-                      {item.label}
+                      {t(item.labelKey)}
                     </a>
                   </li>
                 ))}

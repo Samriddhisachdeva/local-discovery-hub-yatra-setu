@@ -19,18 +19,22 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useQuery } from "convex/react";
+import { Textarea } from "@/components/ui/textarea";
+import { useI18n } from "@/i18n";
+import { useMutation, useQuery } from "convex/react";
 import {
   ArrowRight,
+  Clock,
   Copy,
   Languages,
   MapPin,
   Search,
   SearchX,
+  Send,
   Sparkles,
   UserRound,
 } from "lucide-react";
-import { useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState, type FormEvent, type ReactNode } from "react";
 import { toast } from "sonner";
 
 export function GuidesView({
@@ -38,8 +42,11 @@ export function GuidesView({
 }: {
   onGoToContribute: () => void;
 }) {
+  const { t } = useI18n();
   const guides = useQuery(api.guides.list);
   const myGuide = useQuery(api.guides.mine);
+  const myRequests = useQuery(api.requests.mine);
+  const cancelRequest = useMutation(api.requests.cancel);
   const [search, setSearch] = useState("");
   const [destination, setDestination] = useState("all");
   const [openId, setOpenId] = useState<Id<"guides"> | null>(null);
@@ -78,11 +85,10 @@ export function GuidesView({
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="font-display text-3xl tracking-tight sm:text-4xl">
-            Local guides
+            {t("guides.title")}
           </h1>
           <p className="mt-1.5 text-sm text-muted-foreground">
-            Verified residents who can show you their home — filtered by
-            language, expertise and reviews.
+            {t("guides.subtitle")}
           </p>
         </div>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -91,7 +97,7 @@ export function GuidesView({
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search guides, languages…"
+              placeholder={t("guides.search")}
               className="pl-9 sm:w-64"
             />
           </div>
@@ -100,7 +106,7 @@ export function GuidesView({
               <SelectValue placeholder="Destination" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All destinations</SelectItem>
+              <SelectItem value="all">{t("guides.allDest")}</SelectItem>
               {destinations.map((d) => (
                 <SelectItem key={d} value={d}>
                   {d}
@@ -133,7 +139,7 @@ export function GuidesView({
           </div>
         </div>
         <Button variant="outline" size="sm" onClick={onGoToContribute}>
-          {myGuide ? "Open my profile" : "Become a guide"}
+          {myGuide ? t("guides.openProfile") : t("guides.become")}
           <ArrowRight className="size-4" />
         </Button>
       </div>
@@ -186,7 +192,99 @@ export function GuidesView({
       )}
 
       <GuideDialog guide={openGuide} onClose={() => setOpenId(null)} />
+
+      {/* Traveller's own requests to guides */}
+      {myRequests !== undefined && (
+        <section className="rounded-2xl border border-border/80 bg-card p-5 shadow-soft">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+            {t("req.myRequests")}
+          </p>
+          {myRequests.length === 0 ? (
+            <p className="mt-3 text-sm text-muted-foreground">
+              {t("req.none")}
+            </p>
+          ) : (
+            <ul className="mt-3 space-y-2">
+              {myRequests.map((req) => (
+                <li
+                  key={req._id}
+                  className="flex flex-wrap items-center gap-3 rounded-xl border border-border/70 bg-muted/30 p-3"
+                >
+                  <AvatarChip name={req.guideName} className="size-9" />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium">
+                      {req.guideName}
+                      <span className="ml-2 font-normal text-muted-foreground">
+                        {req.destination}
+                      </span>
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {t("req.details", {
+                        date:
+                          req.date === "flexible"
+                            ? t("req.flexibleLabel")
+                            : req.date,
+                        days: req.days,
+                        party: req.partySize,
+                      })}
+                    </p>
+                  </div>
+                  <StatusChip status={req.status} />
+                  {req.status === "pending" && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="text-destructive hover:text-destructive"
+                      onClick={() => {
+                        cancelRequest({ requestId: req._id }).catch(
+                          (err: unknown) =>
+                            toast.error(
+                              err instanceof Error
+                                ? err.message
+                                : "Could not cancel the request.",
+                            ),
+                        );
+                      }}
+                    >
+                      {t("req.cancel")}
+                    </Button>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      )}
     </div>
+  );
+}
+
+function StatusChip({
+  status,
+}: {
+  status: "pending" | "accepted" | "denied" | "cancelled";
+}) {
+  const { t } = useI18n();
+  const styles = {
+    pending:
+      "border-amber-300/60 bg-amber-50 text-amber-700 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-300",
+    accepted:
+      "border-emerald-300/60 bg-emerald-50 text-emerald-700 dark:border-emerald-500/40 dark:bg-emerald-500/10 dark:text-emerald-300",
+    denied: "border-destructive/40 bg-destructive/10 text-destructive",
+    cancelled: "border-border bg-muted text-muted-foreground",
+  } as const;
+  const label = {
+    pending: t("req.status.pending"),
+    accepted: t("req.status.accepted"),
+    denied: t("req.status.denied"),
+    cancelled: t("req.status.cancelled"),
+  }[status];
+  return (
+    <span
+      className={`shrink-0 rounded-full border px-2.5 py-0.5 text-[11px] font-medium ${styles[status]}`}
+    >
+      {label}
+    </span>
   );
 }
 
@@ -207,6 +305,7 @@ function GuideCard({
   isMine: boolean;
   onOpen: () => void;
 }) {
+  const { t } = useI18n();
   const rating = guide.ratingCount ? guide.ratingSum / guide.ratingCount : 0;
   return (
     <article className="flex flex-col rounded-2xl border border-border/80 bg-card p-5 shadow-soft transition-all hover:-translate-y-0.5 hover:shadow-lifted">
@@ -258,7 +357,7 @@ function GuideCard({
           <span className="text-xs text-muted-foreground">No reviews yet</span>
         )}
         <Button size="sm" onClick={onOpen}>
-          Connect
+          {t("guides.connect")}
         </Button>
       </div>
     </article>
@@ -282,7 +381,41 @@ function GuideDialog({
 }
 
 function GuideDialogContent({ guide }: { guide: Doc<"guides"> }) {
+  const { t } = useI18n();
+  const myRequests = useQuery(api.requests.mine);
+  const createRequest = useMutation(api.requests.create);
+  const [mode, setMode] = useState<"info" | "form">("info");
+  const [sending, setSending] = useState(false);
+
   const rating = guide.ratingCount ? guide.ratingSum / guide.ratingCount : 0;
+  const pending = myRequests?.find(
+    (r) => r.guideId === guide._id && r.status === "pending",
+  );
+
+  const submitRequest = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    setSending(true);
+    try {
+      await createRequest({
+        guideId: guide._id,
+        date: (form.get("date") as string | null) || "flexible",
+        days: Number(form.get("days")) || 1,
+        partySize: Number(form.get("party")) || 1,
+        message: String(form.get("message") ?? ""),
+        contact:
+          ((form.get("contact") as string | null) ?? "").trim() || undefined,
+      });
+      toast.success(t("req.sent"));
+      setMode("info");
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : "Could not send the request.",
+      );
+    } finally {
+      setSending(false);
+    }
+  };
 
   const copyContact = async () => {
     try {
@@ -370,6 +503,112 @@ function GuideDialogContent({ guide }: { guide: Doc<"guides"> }) {
             anyone.
           </p>
         </div>
+
+        {/* Request this specific guide */}
+        {pending ? (
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-300/60 bg-amber-50 p-4 dark:border-amber-500/40 dark:bg-amber-500/10">
+            <p className="flex items-center gap-2 text-sm font-medium text-amber-700 dark:text-amber-300">
+              <Clock className="size-4" />
+              {t("req.sent")}
+            </p>
+            <StatusChip status={pending.status} />
+          </div>
+        ) : mode === "info" ? (
+          <Button className="w-full" onClick={() => setMode("form")}>
+            <Send className="size-4" />
+            {t("req.heading", { name: guide.name })}
+          </Button>
+        ) : (
+          <form
+            onSubmit={submitRequest}
+            className="space-y-4 rounded-xl border border-border/80 bg-muted/30 p-4"
+          >
+            <div>
+              <p className="text-sm font-semibold tracking-tight">
+                {t("req.heading", { name: guide.name })}
+              </p>
+              <p className="mt-0.5 text-xs leading-5 text-muted-foreground">
+                {t("req.blurb")}
+              </p>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-3">
+              <label className="block text-xs font-medium text-muted-foreground">
+                {t("req.date")}
+                <Input
+                  name="date"
+                  type="date"
+                  className="mt-1.5 bg-background"
+                />
+                <span className="mt-1 block font-normal">
+                  {t("req.flexible")}
+                </span>
+              </label>
+              <label className="block text-xs font-medium text-muted-foreground">
+                {t("req.days")}
+                <Input
+                  name="days"
+                  type="number"
+                  min={1}
+                  max={30}
+                  defaultValue={2}
+                  className="mt-1.5 bg-background"
+                />
+              </label>
+              <label className="block text-xs font-medium text-muted-foreground">
+                {t("req.party")}
+                <Input
+                  name="party"
+                  type="number"
+                  min={1}
+                  max={20}
+                  defaultValue={2}
+                  className="mt-1.5 bg-background"
+                />
+              </label>
+            </div>
+
+            <label className="block text-xs font-medium text-muted-foreground">
+              {t("req.message")}
+              <Textarea
+                name="message"
+                required
+                minLength={15}
+                rows={3}
+                placeholder={t("req.messagePh")}
+                className="mt-1.5 bg-background"
+              />
+            </label>
+
+            <label className="block text-xs font-medium text-muted-foreground">
+              {t("req.contact")}
+              <Input
+                name="contact"
+                placeholder="+91 …"
+                className="mt-1.5 bg-background"
+              />
+            </label>
+
+            <div className="flex gap-2">
+              <Button type="submit" disabled={sending} className="flex-1">
+                {sending ? (
+                  <Sparkles className="size-4 animate-pulse" />
+                ) : (
+                  <Send className="size-4" />
+                )}
+                {sending ? t("req.sending") : t("req.send")}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setMode("info")}
+                disabled={sending}
+              >
+                {t("common.cancel")}
+              </Button>
+            </div>
+          </form>
+        )}
 
         <ReviewsSection
           targetType="guide"

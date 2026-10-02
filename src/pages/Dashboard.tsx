@@ -1,9 +1,11 @@
 import { api } from "@/convex/_generated/api";
 import { Brand } from "@/components/Brand";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { AvatarChip } from "@/components/app/catalog";
 import { ContributeView } from "@/components/app/ContributeView";
 import { DiscoverView } from "@/components/app/DiscoverView";
 import { GuidesView } from "@/components/app/GuidesView";
+import { SafetyView, SosFab } from "@/components/app/SafetyView";
 import { TripsView } from "@/components/app/TripsView";
 import {
   DropdownMenu,
@@ -14,6 +16,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/hooks/use-auth";
+import { useI18n } from "@/i18n";
 import { cn } from "@/lib/utils";
 import { useMutation } from "convex/react";
 import {
@@ -22,16 +25,19 @@ import {
   Handshake,
   Home,
   LogOut,
+  ShieldCheck,
+  UserRound,
   Users,
 } from "lucide-react";
 import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 
 const TABS = [
-  { value: "discover", label: "Discover", icon: Compass },
-  { value: "trips", label: "My trips", icon: CalendarRange },
-  { value: "guides", label: "Guides", icon: Handshake },
-  { value: "contribute", label: "Contribute", icon: Users },
+  { value: "discover", labelKey: "tabs.discover", icon: Compass },
+  { value: "trips", labelKey: "tabs.trips", icon: CalendarRange },
+  { value: "guides", labelKey: "tabs.guides", icon: Handshake },
+  { value: "contribute", labelKey: "tabs.contribute", icon: Users },
+  { value: "safety", labelKey: "tabs.safety", icon: ShieldCheck },
 ] as const;
 
 type Tab = (typeof TABS)[number]["value"];
@@ -42,6 +48,7 @@ function isTab(value: string | null): value is Tab {
 
 export default function Dashboard() {
   const { user, signOut } = useAuth();
+  const { t } = useI18n();
   const ensureSeed = useMutation(api.seed.ensureSeed);
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
@@ -95,7 +102,7 @@ export default function Dashboard() {
                   )}
                 >
                   <item.icon className="size-4" />
-                  {item.label}
+                  {t(item.labelKey)}
                 </button>
               ))}
             </nav>
@@ -103,8 +110,9 @@ export default function Dashboard() {
 
           <div className="flex items-center gap-3">
             <span className="hidden text-xs text-muted-foreground lg:inline">
-              Discover • Plan • Connect
+              {t("tagline")}
             </span>
+            <LanguageSwitcher />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
@@ -132,14 +140,18 @@ export default function Dashboard() {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => navigate("/")}>
                   <Home className="size-4" />
-                  Landing page
+                  {t("menu.landing")}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/guide")}>
+                  <UserRound className="size-4" />
+                  {t("menu.guidePortal")}
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={handleSignOut}
                   className="text-destructive focus:text-destructive"
                 >
                   <LogOut className="size-4" />
-                  Sign out
+                  {t("menu.signOut")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -161,7 +173,7 @@ export default function Dashboard() {
               )}
             >
               <item.icon className="size-4" />
-              {item.label}
+              {t(item.labelKey)}
             </button>
           ))}
         </div>
@@ -179,19 +191,21 @@ export default function Dashboard() {
           <GuidesView onGoToContribute={() => goTab("contribute")} />
         )}
         {tab === "contribute" && <ContributeView />}
+        {tab === "safety" && <SafetyView />}
       </main>
 
       <footer className="border-t border-border/70">
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-2 px-5 py-6 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-8">
-          <span>
-            Yatra Setu — Discover • Plan • Connect · by Team Desi Voyagers
-          </span>
+          <span>Yatra Setu — {t("tagline")} · by Team Desi Voyagers</span>
           <span className="inline-flex items-center gap-2">
             <span className="size-1.5 rounded-full bg-[#d9a520]" />
             MVP v1 · under development
           </span>
         </div>
       </footer>
+
+      {/* One-tap emergency access on every tab */}
+      <SosFab />
     </div>
   );
 }
