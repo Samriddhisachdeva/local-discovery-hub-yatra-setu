@@ -48,7 +48,8 @@ export function DiscoverView({
     const term = search.trim().toLowerCase();
     return places.filter((place) => {
       if (category !== "all" && place.category !== category) return false;
-      if (destination !== "all" && place.destination !== destination) return false;
+      if (destination !== "all" && place.destination !== destination)
+        return false;
       if (hiddenOnly && !place.hiddenGem) return false;
       if (!term) return true;
       return [place.title, place.destination, place.summary, place.description]
@@ -59,9 +60,8 @@ export function DiscoverView({
   }, [places, search, category, destination, hiddenOnly]);
 
   const selected =
-    (selectedId
-      ? places?.find((p) => p._id === selectedId)
-      : undefined) ?? null;
+    (selectedId ? places?.find((p) => p._id === selectedId) : undefined) ??
+    null;
 
   const clearFilters = () => {
     setSearch("");
@@ -84,7 +84,12 @@ export function DiscoverView({
           </p>
         </div>
         <label className="flex items-center gap-2.5 rounded-full border border-border bg-card px-3.5 py-2 text-sm shadow-xs">
-          <Gem className={cn("size-4", hiddenOnly ? "text-primary" : "text-muted-foreground")} />
+          <Gem
+            className={cn(
+              "size-4",
+              hiddenOnly ? "text-primary" : "text-muted-foreground",
+            )}
+          />
           Hidden gems only
           <Switch checked={hiddenOnly} onCheckedChange={setHiddenOnly} />
         </label>
@@ -138,7 +143,10 @@ export function DiscoverView({
       {!places ? (
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="overflow-hidden rounded-2xl border border-border/70">
+            <div
+              key={i}
+              className="overflow-hidden rounded-2xl border border-border/70"
+            >
               <Skeleton className="h-36 w-full rounded-none" />
               <div className="space-y-2 p-4">
                 <Skeleton className="h-4 w-2/3" />
@@ -246,10 +254,14 @@ function PlaceCard({
         </div>
       </button>
       <div className="flex items-center justify-between gap-3 border-t border-border/70 px-4 py-3">
-        <Stars
-          value={place.ratingCount ? place.ratingSum / place.ratingCount : 0}
-          count={place.ratingCount}
-        />
+        {place.ratingCount > 0 ? (
+          <Stars
+            value={place.ratingSum / place.ratingCount}
+            count={place.ratingCount}
+          />
+        ) : (
+          <span className="text-xs text-muted-foreground">No reviews yet</span>
+        )}
         <span className="text-xs font-medium text-muted-foreground">
           {budgetLabel(place.budget)}
         </span>

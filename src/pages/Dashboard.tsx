@@ -86,10 +86,10 @@ export default function Dashboard() {
                 <button
                   key={item.value}
                   type="button"
-                onClick={() => goTab(item.value)}
-                className={cn(
-                  "inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors",
-                  tab === item.value
+                  onClick={() => goTab(item.value)}
+                  className={cn(
+                    "inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors",
+                    tab === item.value
                       ? "bg-primary/10 text-primary"
                       : "text-muted-foreground hover:bg-muted hover:text-foreground",
                   )}

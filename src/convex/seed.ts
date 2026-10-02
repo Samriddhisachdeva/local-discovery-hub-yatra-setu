@@ -197,7 +197,8 @@ const places: SeedPlace[] = [
     title: "Tungabhadra Coracle Crossing",
     destination: "Hampi",
     category: "adventure",
-    summary: "Spin across the river in a round basket boat for a handful of rupees.",
+    summary:
+      "Spin across the river in a round basket boat for a handful of rupees.",
     description:
       "The round coracles that ferry villagers across the Tungabhadra take four or five passengers and about ninety seconds. It is the fastest way to the north-bank ruins, and the most fun commute in Karnataka.",
     tips: [
@@ -214,8 +215,7 @@ const places: SeedPlace[] = [
     title: "Laitlum Canyons",
     destination: "Shillong",
     category: "nature",
-    summary:
-      "A grassed cliff edge where the Khasi hills fall away into cloud.",
+    summary: "A grassed cliff edge where the Khasi hills fall away into cloud.",
     description:
       "Forty kilometres from town, the plateau simply stops. Laitlum's canyon rim walks you along wind-flattened grass with terraced villages far below and, on most afternoons, cloud pouring through the gap like slow water.",
     tips: [
@@ -266,7 +266,8 @@ const places: SeedPlace[] = [
     title: "Don Bosco Museum of Tribal Culture",
     destination: "Shillong",
     category: "culture",
-    summary: "Seven floors of Northeast craft, costume and song under one roof.",
+    summary:
+      "Seven floors of Northeast craft, costume and song under one roof.",
     description:
       "The best single introduction to the region before you travel deeper into it: full-size tribal house reconstructions, textile looms, bamboo instruments, and a top-floor gallery whose windows frame the city's hills.",
     tips: [
@@ -469,7 +470,8 @@ const reviews: SeedReview[] = [
     targetKey: "Vijaya Vittala Temple & Stone Chariot",
     authorName: "Junaid S.",
     rating: 5,
-    comment: "The best-preserved ruin in Hampi. Hire the guide at the gate, worth every rupee.",
+    comment:
+      "The best-preserved ruin in Hampi. Hire the guide at the gate, worth every rupee.",
   },
   {
     targetType: "place",
@@ -484,28 +486,32 @@ const reviews: SeedReview[] = [
     targetKey: "Meenakshi Amman Temple",
     authorName: "Devika M.",
     rating: 5,
-    comment: "Go at 6 AM. By 9 it's a different experience entirely. The east gopuram at dawn is unforgettable.",
+    comment:
+      "Go at 6 AM. By 9 it's a different experience entirely. The east gopuram at dawn is unforgettable.",
   },
   {
     targetType: "place",
     targetKey: "Meenakshi Amman Temple",
     authorName: "Claire B.",
     rating: 4,
-    comment: "Stunning, but do read the locker rules before you queue — we got turned back for a phone.",
+    comment:
+      "Stunning, but do read the locker rules before you queue — we got turned back for a phone.",
   },
   {
     targetType: "place",
     targetKey: "Laitlum Canyons",
     authorName: "Rohit D.",
     rating: 4,
-    comment: "Cloud was lifting as we arrived and the view opened up for ten glorious minutes. Go early.",
+    comment:
+      "Cloud was lifting as we arrived and the view opened up for ten glorious minutes. Go early.",
   },
   {
     targetType: "place",
     targetKey: "Godowlia Chaat Lane",
     authorName: "Ananya V.",
     rating: 5,
-    comment: "Ate my way down the lane over three hours. The kachori stall with the steel kadhai is the one.",
+    comment:
+      "Ate my way down the lane over three hours. The kachori stall with the steel kadhai is the one.",
   },
   {
     targetType: "place",
@@ -536,21 +542,24 @@ const reviews: SeedReview[] = [
     targetKey: "Ramesh Tiwari",
     authorName: "Siddharth G.",
     rating: 5,
-    comment: "Booked the sunrise boat. He knew every bird, every ghat, and every story behind them.",
+    comment:
+      "Booked the sunrise boat. He knew every bird, every ghat, and every story behind them.",
   },
   {
     targetType: "guide",
     targetKey: "Lakshmi Sreenath",
     authorName: "Marco B.",
     rating: 5,
-    comment: "The Anegundi walk was the best day of our trip. Lakshmi knows every villager by name.",
+    comment:
+      "The Anegundi walk was the best day of our trip. Lakshmi knows every villager by name.",
   },
   {
     targetType: "guide",
     targetKey: "Lakshmi Sreenath",
     authorName: "Priya N.",
     rating: 4,
-    comment: "Very knowledgeable and patient with our questions. Start early to beat the heat.",
+    comment:
+      "Very knowledgeable and patient with our questions. Start early to beat the heat.",
   },
   {
     targetType: "guide",
@@ -565,14 +574,16 @@ const reviews: SeedReview[] = [
     targetKey: "Arvindbhai Zala",
     authorName: "Ritu J.",
     rating: 5,
-    comment: "Block printing demo in Bhujodi plus the desert route — perfectly organised, no rushing.",
+    comment:
+      "Block printing demo in Bhujodi plus the desert route — perfectly organised, no rushing.",
   },
   {
     targetType: "guide",
     targetKey: "Meenakshi Sundaram",
     authorName: "Olivier D.",
     rating: 4,
-    comment: "Explained the temple rituals clearly and respectfully. The food stop afterwards was superb.",
+    comment:
+      "Explained the temple rituals clearly and respectfully. The food stop afterwards was superb.",
   },
 ];
 
@@ -664,6 +675,15 @@ const guides: SeedGuide[] = [
   },
 ];
 
+/** Contributors are attributed per destination — the seeded guide for that city. */
+const contributorsByDestination: Record<string, string> = {
+  Varanasi: "Anjali Bhatt",
+  Hampi: "Lakshmi Sreenath",
+  Shillong: "Wanlarki Nongkynrih",
+  Madurai: "Meenakshi Sundaram",
+  Bhuj: "Arvindbhai Zala",
+};
+
 /**
  * Seeds the demo destinations, guides and reviews exactly once.
  * Convex mutations run serially, so concurrent first loads can't double-seed.
@@ -687,7 +707,8 @@ export const ensureSeed = mutation({
         budget: place.budget,
         bestTime: place.bestTime,
         hiddenGem: place.hiddenGem,
-        contributorName: "Local contributor",
+        contributorName:
+          contributorsByDestination[place.destination] ?? "A local resident",
         ratingSum: place.ratingSum ?? 0,
         ratingCount: place.ratingCount ?? 0,
         createdAt: now - (places.length - i) * 60_000,

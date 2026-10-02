@@ -1,6 +1,11 @@
 import { api } from "@/convex/_generated/api";
 import type { Doc } from "@/convex/_generated/dataModel";
-import { budgetLabel, CATEGORIES, Stars, VerifiedBadge } from "@/components/app/catalog";
+import {
+  budgetLabel,
+  CATEGORIES,
+  Stars,
+  VerifiedBadge,
+} from "@/components/app/catalog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -50,7 +55,11 @@ const LANGUAGE_OPTIONS = [
 ];
 
 const EMERGENCY = [
-  { code: "112", label: "All-in-one emergency", note: "Police · Fire · Ambulance" },
+  {
+    code: "112",
+    label: "All-in-one emergency",
+    note: "Police · Fire · Ambulance",
+  },
   { code: "1091", label: "Women helpline", note: "Nationwide" },
   { code: "1098", label: "Childline", note: "Children in distress" },
   { code: "1363", label: "Tourist helpline", note: "Ministry of Tourism" },
@@ -79,8 +88,8 @@ export function ContributeView() {
             Contribute as a local
           </h1>
           <p className="mt-1.5 max-w-2xl text-sm text-muted-foreground">
-            Your knowledge is what makes Yatra Setu work — share places,
-            food, routes and culture, then apply to guide travellers yourself.
+            Your knowledge is what makes Yatra Setu work — share places, food,
+            routes and culture, then apply to guide travellers yourself.
           </p>
         </div>
         <p className="rounded-full border border-border bg-card px-3.5 py-2 text-xs text-muted-foreground">
@@ -418,7 +427,9 @@ function MyContributions({ places }: { places: Doc<"places">[] | null }) {
                     {place.destination}
                   </span>
                   <span>·</span>
-                  <span>{place.hiddenGem ? "Hidden gem" : "Community place"}</span>
+                  <span>
+                    {place.hiddenGem ? "Hidden gem" : "Community place"}
+                  </span>
                 </p>
               </div>
               {place.ratingCount > 0 ? (
@@ -459,7 +470,9 @@ function GuideProfile({
   const [contact, setContact] = useState(guide?.contact ?? "");
   const [years, setYears] = useState(String(guide?.years ?? 1));
   const [expertise, setExpertise] = useState(guide?.expertise.join(", ") ?? "");
-  const [languages, setLanguages] = useState<string[]>(guide?.languages ?? ["English"]);
+  const [languages, setLanguages] = useState<string[]>(
+    guide?.languages ?? ["English"],
+  );
   const [busy, setBusy] = useState(false);
 
   const destinations = [...new Set((places ?? []).map((p) => p.destination))];
@@ -488,14 +501,11 @@ function GuideProfile({
         years: Number(years) || 0,
         contact,
       });
-      toast.success(
-        guide ? "Profile updated" : "Application submitted",
-        {
-          description: guide
-            ? "Your guide profile is live with the latest details."
-            : "Confirm your identity to go live to travellers.",
-        },
-      );
+      toast.success(guide ? "Profile updated" : "Application submitted", {
+        description: guide
+          ? "Your guide profile is live with the latest details."
+          : "Confirm your identity to go live to travellers.",
+      });
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "Could not save profile",
@@ -557,8 +567,8 @@ function GuideProfile({
           <div className="flex items-center gap-3">
             <VerifiedBadge />
             <p className="text-sm text-muted-foreground">
-              Visible to travellers in {guide.destination} ·{" "}
-              {guide.ratingCount} review
+              Visible to travellers in {guide.destination} · {guide.ratingCount}{" "}
+              review
               {guide.ratingCount === 1 ? "" : "s"} so far.
             </p>
           </div>

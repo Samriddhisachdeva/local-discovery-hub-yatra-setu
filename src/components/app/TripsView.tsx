@@ -69,7 +69,8 @@ export function TripsView({ onBrowse }: { onBrowse: () => void }) {
   );
 
   const days = useMemo(() => {
-    if (!active) return [] as { day: number; items: Doc<"itineraries">["items"] }[];
+    if (!active)
+      return [] as { day: number; items: Doc<"itineraries">["items"] }[];
     const maxDay = active.items.reduce((max, i) => Math.max(max, i.day), 0);
     return Array.from({ length: maxDay }, (_, i) => ({
       day: i + 1,
@@ -89,9 +90,13 @@ export function TripsView({ onBrowse }: { onBrowse: () => void }) {
       const id = await createTrip({ title, destination });
       setActiveId(id);
       setNewOpen(false);
-      toast.success("Trip created", { description: "Start adding places from Discover." });
+      toast.success("Trip created", {
+        description: "Start adding places from Discover.",
+      });
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not create trip");
+      toast.error(
+        error instanceof Error ? error.message : "Could not create trip",
+      );
     } finally {
       setBusy(false);
     }
@@ -105,7 +110,9 @@ export function TripsView({ onBrowse }: { onBrowse: () => void }) {
       setRenameOpen(false);
       toast.success("Trip updated");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not update trip");
+      toast.error(
+        error instanceof Error ? error.message : "Could not update trip",
+      );
     } finally {
       setBusy(false);
     }
@@ -120,7 +127,9 @@ export function TripsView({ onBrowse }: { onBrowse: () => void }) {
       setDeleteOpen(false);
       toast.success("Trip deleted");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not delete trip");
+      toast.error(
+        error instanceof Error ? error.message : "Could not delete trip",
+      );
     } finally {
       setBusy(false);
     }
@@ -134,7 +143,9 @@ export function TripsView({ onBrowse }: { onBrowse: () => void }) {
     try {
       await moveItem({ itineraryId: active._id, placeId, action });
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not move stop");
+      toast.error(
+        error instanceof Error ? error.message : "Could not move stop",
+      );
     }
   };
 
@@ -144,7 +155,9 @@ export function TripsView({ onBrowse }: { onBrowse: () => void }) {
       await removeItem({ itineraryId: active._id, placeId });
       toast.success("Stop removed");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not remove stop");
+      toast.error(
+        error instanceof Error ? error.message : "Could not remove stop",
+      );
     }
   };
 
@@ -243,8 +256,8 @@ export function TripsView({ onBrowse }: { onBrowse: () => void }) {
                   </span>
                   <span className="inline-flex items-center gap-1.5">
                     <CalendarRange className="size-3.5" />
-                    {active.items.length} stops · {Math.max(days.length, 1)}{" "}
-                    day{days.length === 1 ? "" : "s"}
+                    {active.items.length} stops · {Math.max(days.length, 1)} day
+                    {days.length === 1 ? "" : "s"}
                   </span>
                 </p>
               </div>
@@ -505,7 +518,9 @@ function TripDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{submitLabel === "Create trip" ? "Plan a new trip" : "Edit trip"}</DialogTitle>
+          <DialogTitle>
+            {submitLabel === "Create trip" ? "Plan a new trip" : "Edit trip"}
+          </DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           <div className="space-y-2">

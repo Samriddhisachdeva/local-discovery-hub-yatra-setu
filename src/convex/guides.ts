@@ -62,7 +62,8 @@ export const apply = mutation({
     if (name.length < 2) throw new Error("Enter your name.");
     if (!destination) throw new Error("Which destination do you guide in?");
     if (headline.length < 6) throw new Error("Add a short headline.");
-    if (bio.length < 30) throw new Error("Tell travellers a bit more (30+ characters).");
+    if (bio.length < 30)
+      throw new Error("Tell travellers a bit more (30+ characters).");
     if (!contact) throw new Error("Travellers need a way to reach you.");
 
     const existing = await ctx.db

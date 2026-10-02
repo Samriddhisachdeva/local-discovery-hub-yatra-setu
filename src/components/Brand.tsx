@@ -40,9 +40,7 @@ export function Brand({
 }) {
   return (
     <span className={cn("inline-flex items-center gap-2", className)}>
-      <BrandMark
-        className={cn("size-7 text-primary", markClassName)}
-      />
+      <BrandMark className={cn("size-7 text-primary", markClassName)} />
       <span className="text-[15px] font-semibold tracking-tight">
         Yatra <span className="text-primary">Setu</span>
       </span>

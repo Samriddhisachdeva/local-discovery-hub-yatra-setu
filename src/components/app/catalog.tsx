@@ -175,14 +175,14 @@ export function Stars({
             key={n}
             className={cn(
               "size-3.5",
-              n <= rounded ? "fill-[#d9a520] text-[#d9a520]" : "text-foreground/20",
+              n <= rounded
+                ? "fill-[#d9a520] text-[#d9a520]"
+                : "text-foreground/20",
             )}
           />
         ))}
       </span>
-      <span className="font-medium text-foreground">
-        {value.toFixed(1)}
-      </span>
+      <span className="font-medium text-foreground">{value.toFixed(1)}</span>
       {count !== undefined && <span>({count})</span>}
     </span>
   );

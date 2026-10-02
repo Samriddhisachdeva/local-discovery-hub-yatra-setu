@@ -1,5 +1,10 @@
 import { Brand } from "@/components/Brand";
-import { AvatarChip, PlaceCover, Stars, VerifiedBadge } from "@/components/app/catalog";
+import {
+  AvatarChip,
+  PlaceCover,
+  Stars,
+  VerifiedBadge,
+} from "@/components/app/catalog";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
@@ -177,7 +182,10 @@ function Section({
   return (
     <section
       id={id}
-      className={cn("mx-auto w-full max-w-6xl px-5 py-16 sm:px-8 md:py-24", className)}
+      className={cn(
+        "mx-auto w-full max-w-6xl px-5 py-16 sm:px-8 md:py-24",
+        className,
+      )}
     >
       {children}
     </section>
@@ -189,9 +197,7 @@ export default function Landing() {
   const navigate = useNavigate();
 
   const appHref = (path: string) =>
-    isAuthenticated
-      ? path
-      : `/auth?returnTo=${encodeURIComponent(path)}`;
+    isAuthenticated ? path : `/auth?returnTo=${encodeURIComponent(path)}`;
 
   const go = (path = "/dashboard") => navigate(appHref(path));
 
@@ -257,8 +263,8 @@ export default function Landing() {
             <p className="mt-6 max-w-xl text-pretty text-base leading-7 text-muted-foreground sm:text-lg">
               Yatra Setu is a bridge between travellers and local communities.
               Discover lesser-known places through the people who live there,
-              plan a day-wise itinerary, and connect with verified local
-              guides — all in one platform.
+              plan a day-wise itinerary, and connect with verified local guides
+              — all in one platform.
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <Button size="lg" onClick={() => go()}>
@@ -288,7 +294,7 @@ export default function Landing() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.15, ease: "easeOut" }}
-            className="relative mx-auto w-full max-w-md lg:max-w-none"
+            className="relative mx-auto w-full max-w-md space-y-4 lg:max-w-none"
           >
             <div className="relative rounded-3xl border border-border/80 bg-card p-4 shadow-lifted">
               <PlaceCover
@@ -319,51 +325,61 @@ export default function Landing() {
               </div>
             </div>
 
-            <motion.div
-              animate={{ y: [0, -8, 0] }}
-              transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute -left-4 bottom-6 hidden w-60 rounded-2xl border border-border/80 bg-card p-3 shadow-lifted sm:block"
-            >
-              <p className="flex items-center justify-between px-1 pb-2 text-xs font-semibold">
-                Day 1 · Varanasi
-                <span className="font-normal text-muted-foreground">4 stops</span>
-              </p>
-              <ul className="space-y-1.5">
-                {[
-                  ["Assi Ghat at Dawn", "Spiritual"],
-                  ["Godowlia Chaat Lane", "Food"],
-                  ["Sarai Mohana Weavers", "Market"],
-                ].map(([name, cat]) => (
-                  <li
-                    key={name}
-                    className="flex items-center justify-between rounded-lg bg-muted/70 px-2.5 py-1.5 text-xs"
-                  >
-                    <span className="truncate font-medium">{name}</span>
-                    <span className="pl-2 text-muted-foreground">{cat}</span>
-                  </li>
-                ))}
-              </ul>
-            </motion.div>
-
-            <motion.div
-              animate={{ y: [0, 8, 0] }}
-              transition={{
-                duration: 8,
-                repeat: Infinity,
-                ease: "easeInOut",
-                delay: 0.6,
-              }}
-              className="absolute -right-3 top-10 hidden w-56 items-center gap-3 rounded-2xl border border-border/80 bg-card p-3 shadow-lifted sm:flex"
-            >
-              <AvatarChip name="Ramesh Tiwari" className="size-9" />
-              <div className="min-w-0">
-                <p className="truncate text-sm font-semibold">Ramesh Tiwari</p>
-                <p className="truncate text-xs text-muted-foreground">
-                  Boatman · Varanasi
+            <div className="grid gap-4 sm:grid-cols-2">
+              <motion.div
+                animate={{ y: [0, -6, 0] }}
+                transition={{
+                  duration: 7,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+                className="rounded-2xl border border-border/80 bg-card p-3 shadow-lifted"
+              >
+                <p className="flex items-center justify-between px-1 pb-2 text-xs font-semibold">
+                  Day 1 · Varanasi
+                  <span className="font-normal text-muted-foreground">
+                    4 stops
+                  </span>
                 </p>
-                <VerifiedBadge className="mt-1" />
-              </div>
-            </motion.div>
+                <ul className="space-y-1.5">
+                  {[
+                    ["Assi Ghat at Dawn", "Spiritual"],
+                    ["Godowlia Chaat Lane", "Food"],
+                    ["Sarai Mohana Weavers", "Market"],
+                  ].map(([name, cat]) => (
+                    <li
+                      key={name}
+                      className="flex items-center justify-between rounded-lg bg-muted/70 px-2.5 py-1.5 text-xs"
+                    >
+                      <span className="truncate font-medium">{name}</span>
+                      <span className="pl-2 text-muted-foreground">{cat}</span>
+                    </li>
+                  ))}
+                </ul>
+              </motion.div>
+
+              <motion.div
+                animate={{ y: [0, 6, 0] }}
+                transition={{
+                  duration: 8,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                  delay: 0.6,
+                }}
+                className="flex items-center gap-3 rounded-2xl border border-border/80 bg-card p-3 shadow-lifted sm:p-4"
+              >
+                <AvatarChip name="Ramesh Tiwari" className="size-9" />
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold">
+                    Ramesh Tiwari
+                  </p>
+                  <p className="truncate text-xs text-muted-foreground">
+                    Boatman · Varanasi
+                  </p>
+                  <VerifiedBadge className="mt-1" />
+                </div>
+              </motion.div>
+            </div>
           </motion.div>
         </div>
       </section>
@@ -627,8 +643,8 @@ export default function Landing() {
           </p>
           <p className="relative mx-auto mt-4 max-w-xl text-sm leading-6 text-primary-foreground/80 sm:text-base">
             Join the first version of Yatra Setu as a traveller or a local
-            contributor — and help document the places, food and traditions
-            that deserve to be seen.
+            contributor — and help document the places, food and traditions that
+            deserve to be seen.
           </p>
           <div className="relative mt-8 flex flex-wrap items-center justify-center gap-3">
             <Button

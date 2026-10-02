@@ -93,7 +93,9 @@ export function ReviewsSection({
         description: "Thanks — it helps the next traveller.",
       });
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not post review");
+      toast.error(
+        error instanceof Error ? error.message : "Could not post review",
+      );
     } finally {
       setBusy(false);
     }
@@ -204,7 +206,9 @@ export function ReportButton({
         description: "Our moderation team will review this entry.",
       });
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not submit report");
+      toast.error(
+        error instanceof Error ? error.message : "Could not submit report",
+      );
     } finally {
       setBusy(false);
     }

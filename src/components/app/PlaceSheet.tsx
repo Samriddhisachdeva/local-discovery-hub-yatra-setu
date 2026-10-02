@@ -160,14 +160,14 @@ function PlaceSheetContent({
                 <MapPin className="size-3.5" />
                 {place.destination}
               </span>
-              <Stars
-                value={
-                  place.ratingCount
-                    ? place.ratingSum / place.ratingCount
-                    : 0
-                }
-                count={place.ratingCount}
-              />
+              {place.ratingCount > 0 ? (
+                <Stars
+                  value={place.ratingSum / place.ratingCount}
+                  count={place.ratingCount}
+                />
+              ) : (
+                <span className="text-xs">No reviews yet</span>
+              )}
             </SheetDescription>
           </SheetHeader>
 
@@ -219,7 +219,7 @@ function PlaceSheetContent({
             <span className="font-medium text-foreground">
               {place.contributorName}
             </span>{" "}
-            · a local resident
+            · someone who lives here
           </p>
         )}
 
@@ -276,9 +276,7 @@ function PlaceSheetContent({
                           {trip.title}
                         </SelectItem>
                       ))}
-                      <SelectItem value="__new">
-                        + Start a new trip
-                      </SelectItem>
+                      <SelectItem value="__new">+ Start a new trip</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

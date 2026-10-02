@@ -53,7 +53,8 @@ export const add = mutation({
     const user = await ctx.db.get(userId);
     const rating = Math.max(1, Math.min(5, Math.round(args.rating)));
     const comment = args.comment.trim();
-    if (comment.length < 5) throw new Error("Add a few words about your experience.");
+    if (comment.length < 5)
+      throw new Error("Add a few words about your experience.");
 
     const existing = (
       await ctx.db
@@ -67,7 +68,13 @@ export const add = mutation({
     const authorName = user?.name || user?.email || "Traveller";
     if (existing) {
       await ctx.db.patch(existing._id, { rating, comment, authorName });
-      await bumpRating(ctx, args.targetType, args.targetId, existing.rating, rating);
+      await bumpRating(
+        ctx,
+        args.targetType,
+        args.targetId,
+        existing.rating,
+        rating,
+      );
       return existing._id;
     }
     const id = await ctx.db.insert("reviews", {

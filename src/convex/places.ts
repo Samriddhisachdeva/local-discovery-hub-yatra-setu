@@ -49,7 +49,8 @@ export const create = mutation({
     const title = args.title.trim();
     const destination = args.destination.trim();
     if (title.length < 3) throw new Error("Give the place a proper name.");
-    if (destination.length < 2) throw new Error("Which destination is this in?");
+    if (destination.length < 2)
+      throw new Error("Which destination is this in?");
     if (args.summary.trim().length < 10)
       throw new Error("Add a one-line summary (at least 10 characters).");
 

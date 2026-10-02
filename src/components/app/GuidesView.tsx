@@ -1,10 +1,6 @@
 import { api } from "@/convex/_generated/api";
 import type { Doc, Id } from "@/convex/_generated/dataModel";
-import {
-  AvatarChip,
-  Stars,
-  VerifiedBadge,
-} from "@/components/app/catalog";
+import { AvatarChip, Stars, VerifiedBadge } from "@/components/app/catalog";
 import { ReviewsSection } from "@/components/app/feedback";
 import { Button } from "@/components/ui/button";
 import {
