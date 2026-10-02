@@ -50,7 +50,7 @@ const STEPS = [
     n: "02",
     icon: CalendarRange,
     title: "Plan",
-    body: "Drop the places you like into a day-wise itinerary. Reorder stops, move them across days, and shape the trip around your time and budget.",
+    body: "Let the auto-planner build a day-wise itinerary from your trip duration and budget — or drop in places yourself and reorder stops across days.",
   },
   {
     n: "03",
@@ -73,8 +73,8 @@ const FEATURES = [
   },
   {
     icon: CalendarRange,
-    title: "Day-wise itinerary",
-    body: "Build Day 1, Day 2 and beyond. Reorder stops, shift them between days, and keep your plan in one place.",
+    title: "Auto-planned itineraries",
+    body: "Set days, budget and pace — the planner fills Day 1, Day 2 and beyond within your spend, then lets you reorder or shift stops.",
   },
   {
     icon: BadgeCheck,
@@ -100,6 +100,8 @@ const DESTINATIONS = [
     blurb: "Ghats, weavers' lanes & old-city food",
     icon: Sparkles,
     tint: "from-[#f8ebe6] to-[#f0d8cf]",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/c/c2/Assi_Ghat_Varanasi_morning_Aarti.jpg",
   },
   {
     name: "Hampi",
@@ -107,6 +109,8 @@ const DESTINATIONS = [
     blurb: "Ruins, coracles & boulder lakes",
     icon: Gem,
     tint: "from-[#f1ece3] to-[#e2d9c9]",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/Wide_angle_of_Galigopuram_of_Virupaksha_Temple%2C_Hampi_%2804%29_%28cropped%29.jpg/1280px-Wide_angle_of_Galigopuram_of_Virupaksha_Temple%2C_Hampi_%2804%29_%28cropped%29.jpg",
   },
   {
     name: "Shillong",
@@ -114,6 +118,8 @@ const DESTINATIONS = [
     blurb: "Canyons, markets & sacred groves",
     icon: Sprout,
     tint: "from-[#e8f1e9] to-[#d5e6da]",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/Elephant_Falls_II%2C_Shillong.jpg/1280px-Elephant_Falls_II%2C_Shillong.jpg",
   },
   {
     name: "Madurai",
@@ -121,6 +127,8 @@ const DESTINATIONS = [
     blurb: "Temple town, tanks & sweet shops",
     icon: Users,
     tint: "from-[#efeaf3] to-[#e0d8ed]",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/Meenakshi_Amman_West_Tower.jpg/1280px-Meenakshi_Amman_West_Tower.jpg",
   },
   {
     name: "Bhuj",
@@ -128,6 +136,8 @@ const DESTINATIONS = [
     blurb: "Palaces, looms & desert roads",
     icon: MapPin,
     tint: "from-[#f4ece6] to-[#ead7ca]",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Pragmahal_Bhuj_Kutch_Gujarat.jpg/1280px-Pragmahal_Bhuj_Kutch_Gujarat.jpg",
   },
 ];
 
@@ -278,7 +288,7 @@ export default function Landing() {
             <ul className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground">
               {[
                 "Verified local guides",
-                "Day-wise itinerary planner",
+                "Auto-planner by days & budget",
                 "Reviews, reports & safety info",
               ].map((item) => (
                 <li key={item} className="flex items-center gap-2">
@@ -299,6 +309,8 @@ export default function Landing() {
             <div className="relative rounded-3xl border border-border/80 bg-card p-4 shadow-lifted">
               <PlaceCover
                 category="spiritual"
+                image="https://upload.wikimedia.org/wikipedia/commons/c/c2/Assi_Ghat_Varanasi_morning_Aarti.jpg"
+                alt="Assi Ghat, Varanasi"
                 className="h-40 rounded-2xl"
                 iconSize="size-28"
               />
@@ -462,7 +474,17 @@ export default function Landing() {
                   dest.tint,
                 )}
               >
+                <img
+                  src={dest.image}
+                  alt={dest.name}
+                  loading="lazy"
+                  className="absolute inset-0 size-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  onError={(e) => {
+                    e.currentTarget.style.display = "none";
+                  }}
+                />
                 <div className="grain absolute inset-0 opacity-60" />
+                <div className="absolute inset-0 bg-gradient-to-t from-card/70 to-transparent" />
                 <dest.icon
                   className="absolute -bottom-3 -right-2 size-16 text-foreground/10"
                   strokeWidth={1.1}

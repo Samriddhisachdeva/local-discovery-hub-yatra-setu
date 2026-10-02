@@ -101,17 +101,22 @@ export function initials(name: string) {
 }
 
 /**
- * Generated cover art — a soft category tint with a ghosted icon, so every
- * card has a visual identity without depending on remote images.
+ * Generated cover art — a soft category tint with a ghosted icon. When a real
+ * photo is available it renders on top, and silently falls back to the tint if
+ * the image fails to load.
  */
 export function PlaceCover({
   category,
   hiddenGem = false,
+  image,
+  alt = "",
   className,
   iconSize = "size-24",
 }: {
   category: string;
   hiddenGem?: boolean;
+  image?: string | null;
+  alt?: string;
   className?: string;
   iconSize?: string;
 }) {
@@ -126,11 +131,22 @@ export function PlaceCover({
         className,
       )}
     >
+      {image && (
+        <img
+          src={image}
+          alt={alt}
+          loading="lazy"
+          className="absolute inset-0 size-full object-cover"
+          onError={(e) => {
+            e.currentTarget.style.display = "none";
+          }}
+        />
+      )}
       <div className="grain absolute inset-0 opacity-60" />
       <Icon
         aria-hidden
         className={cn(
-          "absolute -bottom-3 -right-2 text-foreground/10",
+          "absolute -bottom-3 -right-2 text-foreground/10 drop-shadow-sm",
           iconSize,
         )}
         strokeWidth={1.1}

@@ -685,18 +685,164 @@ const contributorsByDestination: Record<string, string> = {
 };
 
 /**
+ * Editorial photos (Wikimedia Commons) and typical per-person spend (₹) for
+ * each seed place. Used by the auto-planner's budget maths and by the cards.
+ */
+const mediaByTitle: Record<string, { image: string; cost: number }> = {
+  // Varanasi
+  "Assi Ghat at Dawn": {
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/c/c2/Assi_Ghat_Varanasi_morning_Aarti.jpg",
+    cost: 0,
+  },
+  "Tulsi Ghat & Laburnum Lane": {
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Tulsi_Ghat.jpg/1280px-Tulsi_Ghat.jpg",
+    cost: 0,
+  },
+  "Kashi Vishwanath Corridor": {
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/f/ff/Kashi_Vishwanath.jpg",
+    cost: 100,
+  },
+  "Godowlia Chaat Lane": {
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Dahi_puri%2C_Doi_phuchka.jpg/1280px-Dahi_puri%2C_Doi_phuchka.jpg",
+    cost: 250,
+  },
+  "Sarai Mohana Weavers' Quarter": {
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/4/4e/%27Sari%27_from_Varanasi_%28north-central_India%29%2C_silk_and_gold-wrapped_silk_yarn_with_supplementary_weft_brocade.jpg",
+    cost: 400,
+  },
+  "Ramnagar Fort & Boat Crossing": {
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/8/89/Entrance_area_of_Ramnagar_Fort.jpg/1280px-Entrance_area_of_Ramnagar_Fort.jpg",
+    cost: 200,
+  },
+  // Hampi
+  "Hemakuta Hill for Sunset": {
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/Wide_angle_of_Galigopuram_of_Virupaksha_Temple%2C_Hampi_%2804%29_%28cropped%29.jpg/1280px-Wide_angle_of_Galigopuram_of_Virupaksha_Temple%2C_Hampi_%2804%29_%28cropped%29.jpg",
+    cost: 0,
+  },
+  "Anegundi Village Walk": {
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Gagan_Mahal_palace%2C_Anegundi.jpg/1280px-Gagan_Mahal_palace%2C_Anegundi.jpg",
+    cost: 400,
+  },
+  "Sanapur Lake & Boulder Rapids": {
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Hampi%2C_Tungabhadra_River%2C_India.jpg/1280px-Hampi%2C_Tungabhadra_River%2C_India.jpg",
+    cost: 150,
+  },
+  "Vijaya Vittala Temple & Stone Chariot": {
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/Wide_angle_of_Galigopuram_of_Virupaksha_Temple%2C_Hampi_%2804%29_%28cropped%29.jpg/1280px-Wide_angle_of_Galigopuram_of_Virupaksha_Temple%2C_Hampi_%2804%29_%28cropped%29.jpg",
+    cost: 50,
+  },
+  "Tungabhadra Coracle Crossing": {
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Hampi%2C_Tungabhadra_River%2C_India.jpg/1280px-Hampi%2C_Tungabhadra_River%2C_India.jpg",
+    cost: 100,
+  },
+  // Shillong
+  "Laitlum Canyons": {
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/Elephant_Falls_II%2C_Shillong.jpg/1280px-Elephant_Falls_II%2C_Shillong.jpg",
+    cost: 300,
+  },
+  "Khyndai Lad Food Stalls": {
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Dahi_puri%2C_Doi_phuchka.jpg/1280px-Dahi_puri%2C_Doi_phuchka.jpg",
+    cost: 250,
+  },
+  "Umiam Lake at First Light": {
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/6/6a/Umiam_Lake_-_by_Vikramjit_Kakati.png",
+    cost: 150,
+  },
+  "Don Bosco Museum of Tribal Culture": {
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/Elephant_Falls_II%2C_Shillong.jpg/1280px-Elephant_Falls_II%2C_Shillong.jpg",
+    cost: 200,
+  },
+  "Mawphlang Sacred Grove": {
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/Mawphlang_village.jpg/1280px-Mawphlang_village.jpg",
+    cost: 400,
+  },
+  // Madurai
+  "Meenakshi Amman Temple": {
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/Meenakshi_Amman_West_Tower.jpg/1280px-Meenakshi_Amman_West_Tower.jpg",
+    cost: 0,
+  },
+  "Theppakulam Tank at Dusk": {
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/Meenakshi_Amman_West_Tower.jpg/1280px-Meenakshi_Amman_West_Tower.jpg",
+    cost: 0,
+  },
+  "Puthu Mandapam Market": {
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/8/86/Laad_Bazaar.jpg",
+    cost: 300,
+  },
+  "Jigarthanda Trail": {
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Thandai_%28Spiced_Indian_Milk_Drink%29.JPG/1280px-Thandai_%28Spiced_Indian_Milk_Drink%29.JPG",
+    cost: 150,
+  },
+  // Bhuj
+  "Aina Mahal & Prag Mahal": {
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/Damaged_Ainamahal_Bhuj_Kutch_Gujarat.jpg/1280px-Damaged_Ainamahal_Bhuj_Kutch_Gujarat.jpg",
+    cost: 300,
+  },
+  "Bhujodi Weavers' Village": {
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/4/4e/%27Sari%27_from_Varanasi_%28north-central_India%29%2C_silk_and_gold-wrapped_silk_yarn_with_supplementary_weft_brocade.jpg",
+    cost: 200,
+  },
+  "Kala Dungar (Black Hill)": {
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b2/Rann_of_Kutch_-_White_Desert.jpg/1280px-Rann_of_Kutch_-_White_Desert.jpg",
+    cost: 500,
+  },
+  "Old City Snack Walk": {
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Dahi_puri%2C_Doi_phuchka.jpg/1280px-Dahi_puri%2C_Doi_phuchka.jpg",
+    cost: 300,
+  },
+};
+
+/**
  * Seeds the demo destinations, guides and reviews exactly once.
  * Convex mutations run serially, so concurrent first loads can't double-seed.
  */
 export const ensureSeed = mutation({
   args: {},
   handler: async (ctx) => {
-    const existing = await ctx.db.query("places").take(1);
-    if (existing.length > 0) return;
+    const existing = await ctx.db.query("places").collect();
+    if (existing.length > 0) {
+      // Back-fill photos/costs on seed rows created by an older version.
+      for (const doc of existing) {
+        const media = mediaByTitle[doc.title];
+        if (!media) continue;
+        if (doc.image !== media.image || doc.cost !== media.cost) {
+          await ctx.db.patch(doc._id, {
+            image: media.image,
+            cost: media.cost,
+          });
+        }
+      }
+      return;
+    }
 
     const now = Date.now();
     const resolvedPlaces = new Map<string, string>();
     for (const [i, place] of places.entries()) {
+      const media = mediaByTitle[place.title];
       const id = await ctx.db.insert("places", {
         title: place.title,
         destination: place.destination,
@@ -707,6 +853,8 @@ export const ensureSeed = mutation({
         budget: place.budget,
         bestTime: place.bestTime,
         hiddenGem: place.hiddenGem,
+        image: media?.image,
+        cost: media?.cost,
         contributorName:
           contributorsByDestination[place.destination] ?? "A local resident",
         ratingSum: place.ratingSum ?? 0,

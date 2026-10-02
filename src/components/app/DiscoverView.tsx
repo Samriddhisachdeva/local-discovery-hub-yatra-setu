@@ -20,9 +20,22 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
+import { AnimatePresence, motion } from "framer-motion";
 import { useQuery } from "convex/react";
-import { Gem, MapPin, Search, SearchX } from "lucide-react";
+import { Gem, MapPin, Search, SearchX, ArrowUpDown } from "lucide-react";
 import { useMemo, useState, type ComponentType } from "react";
+
+const FALLBACK_COST: Record<string, number> = {
+  free: 0,
+  budget: 250,
+  moderate: 700,
+  splurge: 1500,
+};
+
+const costOf = (p: { cost?: number; budget: string }) =>
+  p.cost ?? FALLBACK_COST[p.budget] ?? 0;
+const ratingOf = (p: { ratingSum: number; ratingCount: number }) =>
+  p.ratingCount > 0 ? p.ratingSum / p.ratingCount : 0;
 
 export function DiscoverView({
   initialQuery = "",
@@ -35,6 +48,7 @@ export function DiscoverView({
   const [search, setSearch] = useState(initialQuery);
   const [category, setCategory] = useState("all");
   const [destination, setDestination] = useState("all");
+  const [sort, setSort] = useState("recommended");
   const [hiddenOnly, setHiddenOnly] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
@@ -46,7 +60,7 @@ export function DiscoverView({
   const filtered = useMemo(() => {
     if (!places) return [];
     const term = search.trim().toLowerCase();
-    return places.filter((place) => {
+    const list = places.filter((place) => {
       if (category !== "all" && place.category !== category) return false;
       if (destination !== "all" && place.destination !== destination)
         return false;
@@ -57,7 +71,28 @@ export function DiscoverView({
         .toLowerCase()
         .includes(term);
     });
-  }, [places, search, category, destination, hiddenOnly]);
+    const ranked = [...list];
+    if (sort === "rating") {
+      ranked.sort((a, b) => ratingOf(b) - ratingOf(a));
+    } else if (sort === "cost") {
+      ranked.sort((a, b) => costOf(a) - costOf(b));
+    } else if (sort === "gems") {
+      ranked.sort(
+        (a, b) =>
+          Number(b.hiddenGem) - Number(a.hiddenGem) ||
+          (b.ratingCount ? b.ratingSum / b.ratingCount : 0) -
+            (a.ratingCount ? a.ratingSum / a.ratingCount : 0),
+      );
+    } else {
+      ranked.sort(
+        (a, b) =>
+          (ratingOf(b) || 3.4) +
+          (b.hiddenGem ? 0.4 : 0) -
+          ((ratingOf(a) || 3.4) + (a.hiddenGem ? 0.4 : 0)),
+      );
+    }
+    return ranked;
+  }, [places, search, category, destination, hiddenOnly, sort]);
 
   const selected =
     (selectedId ? places?.find((p) => p._id === selectedId) : undefined) ??
@@ -67,6 +102,7 @@ export function DiscoverView({
     setSearch("");
     setCategory("all");
     setDestination("all");
+    setSort("recommended");
     setHiddenOnly(false);
   };
 
@@ -107,7 +143,7 @@ export function DiscoverView({
             />
           </div>
           <Select value={destination} onValueChange={setDestination}>
-            <SelectTrigger className="w-full sm:w-52">
+            <SelectTrigger className="w-full sm:w-44">
               <MapPin className="size-4 text-muted-foreground" />
               <SelectValue placeholder="Destination" />
             </SelectTrigger>
@@ -118,6 +154,18 @@ export function DiscoverView({
                   {d}
                 </SelectItem>
               ))}
+            </SelectContent>
+          </Select>
+          <Select value={sort} onValueChange={setSort}>
+            <SelectTrigger className="w-full sm:w-48">
+              <ArrowUpDown className="size-4 text-muted-foreground" />
+              <SelectValue placeholder="Sort" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="recommended">Recommended</SelectItem>
+              <SelectItem value="rating">Top rated</SelectItem>
+              <SelectItem value="cost">Lowest cost</SelectItem>
+              <SelectItem value="gems">Hidden gems first</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -169,15 +217,17 @@ export function DiscoverView({
           </Button>
         </div>
       ) : (
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((place) => (
-            <PlaceCard
-              key={place._id}
-              place={place}
-              onOpen={() => setSelectedId(place._id)}
-            />
-          ))}
-        </div>
+        <motion.div layout className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <AnimatePresence mode="popLayout">
+            {filtered.map((place) => (
+              <PlaceCard
+                key={place._id}
+                place={place}
+                onOpen={() => setSelectedId(place._id)}
+              />
+            ))}
+          </AnimatePresence>
+        </motion.div>
       )}
 
       <PlaceSheet
@@ -226,7 +276,14 @@ function PlaceCard({
 }) {
   const meta = categoryMeta(place.category);
   return (
-    <article className="group overflow-hidden rounded-2xl border border-border/80 bg-card shadow-soft transition-all hover:-translate-y-0.5 hover:shadow-lifted">
+    <motion.article
+      layout
+      initial={{ opacity: 0, y: 14 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.96 }}
+      transition={{ duration: 0.25, ease: "easeOut" }}
+      className="group overflow-hidden rounded-2xl border border-border/80 bg-card shadow-soft transition-all hover:-translate-y-0.5 hover:shadow-lifted"
+    >
       <button
         type="button"
         onClick={onOpen}
@@ -235,6 +292,8 @@ function PlaceCard({
         <PlaceCover
           category={place.category}
           hiddenGem={place.hiddenGem}
+          image={place.image}
+          alt={place.title}
           className="h-36"
         />
         <div className="space-y-2 p-4">
@@ -264,8 +323,11 @@ function PlaceCard({
         )}
         <span className="text-xs font-medium text-muted-foreground">
           {budgetLabel(place.budget)}
+          {typeof place.cost === "number" && place.cost > 0
+            ? ` · ₹${place.cost}`
+            : ""}
         </span>
       </div>
-    </article>
+    </motion.article>
   );
 }

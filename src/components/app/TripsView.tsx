@@ -1,5 +1,6 @@
 import { api } from "@/convex/_generated/api";
 import type { Doc, Id } from "@/convex/_generated/dataModel";
+import { AutoPlanDialog } from "@/components/app/AutoPlanDialog";
 import { categoryMeta } from "@/components/app/catalog";
 import {
   AlertDialog,
@@ -30,6 +31,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import { AnimatePresence, motion } from "framer-motion";
 import { useMutation, useQuery } from "convex/react";
 import {
   ArrowLeft,
@@ -41,14 +43,19 @@ import {
   MapPin,
   Pencil,
   Plus,
+  Sparkles,
   Trash2,
   X,
 } from "lucide-react";
 import { useMemo, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 
+const inr = (n: number) =>
+  new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(n);
+
 export function TripsView({ onBrowse }: { onBrowse: () => void }) {
   const trips = useQuery(api.trips.listMine);
+  const places = useQuery(api.places.list);
   const createTrip = useMutation(api.trips.create);
   const updateTrip = useMutation(api.trips.update);
   const removeTrip = useMutation(api.trips.remove);
@@ -56,6 +63,7 @@ export function TripsView({ onBrowse }: { onBrowse: () => void }) {
   const moveItem = useMutation(api.trips.moveItem);
 
   const [activeId, setActiveId] = useState<Id<"itineraries"> | null>(null);
+  const [autoOpen, setAutoOpen] = useState(false);
   const [newOpen, setNewOpen] = useState(false);
   const [renameOpen, setRenameOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -76,6 +84,16 @@ export function TripsView({ onBrowse }: { onBrowse: () => void }) {
       day: i + 1,
       items: active.items.filter((item) => item.day === i + 1),
     }));
+  }, [active]);
+
+  const budgetInfo = useMemo(() => {
+    if (!active) return null;
+    const planned = active.items.reduce((sum, i) => sum + (i.cost ?? 0), 0);
+    const budget = active.budget ?? null;
+    const pct = budget
+      ? Math.min(100, Math.round((planned / budget) * 100))
+      : null;
+    return { planned, budget, pct };
   }, [active]);
 
   const openNew = () => {
@@ -173,7 +191,7 @@ export function TripsView({ onBrowse }: { onBrowse: () => void }) {
   if (trips.length === 0) {
     return (
       <div className="space-y-6">
-        <TripsHeader onNew={openNew} />
+        <TripsHeader onNew={openNew} onAuto={() => setAutoOpen(true)} />
         <Empty>
           <EmptyHeader>
             <EmptyContent>
@@ -185,7 +203,11 @@ export function TripsView({ onBrowse }: { onBrowse: () => void }) {
             </EmptyContent>
           </EmptyHeader>
           <div className="flex flex-wrap justify-center gap-2">
-            <Button onClick={openNew}>
+            <Button onClick={() => setAutoOpen(true)}>
+              <Sparkles className="size-4" />
+              Auto-plan my trip
+            </Button>
+            <Button variant="outline" onClick={openNew}>
               <Plus className="size-4" />
               New trip
             </Button>
@@ -206,13 +228,20 @@ export function TripsView({ onBrowse }: { onBrowse: () => void }) {
           busy={busy}
           submitLabel="Create trip"
         />
+        <AutoPlanDialog
+          open={autoOpen}
+          onOpenChange={setAutoOpen}
+          trip={null}
+          places={places}
+          onGenerated={setActiveId}
+        />
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <TripsHeader onNew={openNew} />
+      <TripsHeader onNew={openNew} onAuto={() => setAutoOpen(true)} />
 
       <div className="grid gap-6 lg:grid-cols-[240px_1fr]">
         {/* Trip switcher */}
@@ -262,6 +291,10 @@ export function TripsView({ onBrowse }: { onBrowse: () => void }) {
                 </p>
               </div>
               <div className="flex items-center gap-2">
+                <Button size="sm" onClick={() => setAutoOpen(true)}>
+                  <Sparkles className="size-4" />
+                  Auto-plan
+                </Button>
                 <Button
                   variant="outline"
                   size="sm"
@@ -283,25 +316,81 @@ export function TripsView({ onBrowse }: { onBrowse: () => void }) {
                   <Trash2 className="size-4" />
                 </Button>
               </div>
+
+              {budgetInfo && budgetInfo.budget !== null && (
+                <div className="w-full space-y-1.5">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-medium">
+                      ₹{inr(budgetInfo.planned)} planned of ₹
+                      {inr(budgetInfo.budget)}
+                    </span>
+                    <span
+                      className={
+                        budgetInfo.planned > budgetInfo.budget
+                          ? "font-semibold text-destructive"
+                          : "text-muted-foreground"
+                      }
+                    >
+                      {budgetInfo.planned > budgetInfo.budget
+                        ? `₹${inr(budgetInfo.planned - budgetInfo.budget)} over budget`
+                        : `₹${inr(budgetInfo.budget - budgetInfo.planned)} left`}
+                    </span>
+                  </div>
+                  <div className="h-2 overflow-hidden rounded-full bg-muted">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${budgetInfo.pct ?? 0}%` }}
+                      transition={{ duration: 0.7, ease: "easeOut" }}
+                      className={cn(
+                        "h-full rounded-full",
+                        budgetInfo.planned > budgetInfo.budget
+                          ? "bg-destructive"
+                          : (budgetInfo.pct ?? 0) >= 80
+                            ? "bg-amber-500"
+                            : "bg-primary",
+                      )}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {budgetInfo && budgetInfo.budget === null && (
+                <div className="w-full text-xs text-muted-foreground">
+                  {budgetInfo.planned > 0
+                    ? `₹${inr(budgetInfo.planned)} planned so far · set a budget with Auto-plan`
+                    : "No budget set yet — Auto-plan suggests one from your trip length."}
+                </div>
+              )}
             </div>
 
             {active.items.length === 0 && (
               <div className="rounded-2xl border border-dashed border-border p-8 text-center">
                 <p className="font-medium">This trip is still empty</p>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Add places from Discover and drop them into days.
+                  Auto-plan a day-wise route from your duration and budget — or
+                  add places from Discover.
                 </p>
-                <Button className="mt-4" onClick={onBrowse}>
-                  <Compass className="size-4" />
-                  Browse places
-                </Button>
+                <div className="mt-4 flex flex-wrap justify-center gap-2">
+                  <Button onClick={() => setAutoOpen(true)}>
+                    <Sparkles className="size-4" />
+                    Auto-plan this trip
+                  </Button>
+                  <Button variant="outline" onClick={onBrowse}>
+                    <Compass className="size-4" />
+                    Browse places
+                  </Button>
+                </div>
               </div>
             )}
 
             {days.map(({ day, items }) => {
               return (
-                <div
+                <motion.div
+                  layout
                   key={day}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.25, ease: "easeOut" }}
                   className="rounded-2xl border border-border/80 bg-card p-4 shadow-soft sm:p-5"
                 >
                   <div className="flex items-center justify-between gap-3">
@@ -326,70 +415,94 @@ export function TripsView({ onBrowse }: { onBrowse: () => void }) {
 
                   {items.length > 0 ? (
                     <ul className="mt-4 space-y-2">
-                      {items.map((item, index) => {
-                        const meta = categoryMeta(item.category);
-                        return (
-                          <li
-                            key={item.placeId}
-                            className="flex items-center gap-3 rounded-xl border border-border/70 bg-muted/30 p-2.5"
-                          >
-                            <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-background text-muted-foreground">
-                              <meta.icon className="size-4" />
-                            </span>
-                            <div className="min-w-0 flex-1">
-                              <p className="truncate text-sm font-medium">
-                                {item.title}
-                              </p>
-                              <p className="truncate text-xs text-muted-foreground">
-                                {item.destination} · {meta.label}
-                              </p>
-                            </div>
-                            <div className="flex items-center gap-0.5">
-                              <IconBtn
-                                label="Move up"
-                                disabled={index === 0}
-                                onClick={() => act(item.placeId, "up")}
-                              >
-                                <ChevronUp className="size-4" />
-                              </IconBtn>
-                              <IconBtn
-                                label="Move down"
-                                disabled={index === items.length - 1}
-                                onClick={() => act(item.placeId, "down")}
-                              >
-                                <ChevronDown className="size-4" />
-                              </IconBtn>
-                              <IconBtn
-                                label="Move to previous day"
-                                disabled={day === 1}
-                                onClick={() => act(item.placeId, "earlierDay")}
-                              >
-                                <ArrowLeft className="size-4" />
-                              </IconBtn>
-                              <IconBtn
-                                label="Move to next day"
-                                disabled={day >= 14}
-                                onClick={() => act(item.placeId, "laterDay")}
-                              >
-                                <ArrowRight className="size-4" />
-                              </IconBtn>
-                              <IconBtn
-                                label="Remove stop"
-                                onClick={() => drop(item.placeId)}
-                              >
-                                <X className="size-4" />
-                              </IconBtn>
-                            </div>
-                          </li>
-                        );
-                      })}
+                      <AnimatePresence initial={false}>
+                        {items.map((item, index) => {
+                          const meta = categoryMeta(item.category);
+                          return (
+                            <motion.li
+                              layout
+                              key={item.placeId}
+                              initial={{ opacity: 0, y: -6 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, x: -16 }}
+                              transition={{ duration: 0.2 }}
+                              className="flex items-center gap-3 rounded-xl border border-border/70 bg-muted/30 p-2.5"
+                            >
+                              <span className="relative flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-muted text-muted-foreground">
+                                <meta.icon className="size-4" />
+                                {item.image && (
+                                  <img
+                                    src={item.image}
+                                    alt=""
+                                    className="absolute inset-0 size-full object-cover"
+                                    onError={(e) => {
+                                      e.currentTarget.style.display = "none";
+                                    }}
+                                  />
+                                )}
+                              </span>
+                              <div className="min-w-0 flex-1">
+                                <p className="truncate text-sm font-medium">
+                                  {item.title}
+                                </p>
+                                <p className="truncate text-xs text-muted-foreground">
+                                  {item.destination} · {meta.label}
+                                  {typeof item.cost === "number"
+                                    ? item.cost === 0
+                                      ? " · free"
+                                      : ` · ₹${item.cost}`
+                                    : ""}
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-0.5">
+                                <IconBtn
+                                  label="Move up"
+                                  disabled={index === 0}
+                                  onClick={() => act(item.placeId, "up")}
+                                >
+                                  <ChevronUp className="size-4" />
+                                </IconBtn>
+                                <IconBtn
+                                  label="Move down"
+                                  disabled={index === items.length - 1}
+                                  onClick={() => act(item.placeId, "down")}
+                                >
+                                  <ChevronDown className="size-4" />
+                                </IconBtn>
+                                <IconBtn
+                                  label="Move to previous day"
+                                  disabled={day === 1}
+                                  onClick={() =>
+                                    act(item.placeId, "earlierDay")
+                                  }
+                                >
+                                  <ArrowLeft className="size-4" />
+                                </IconBtn>
+                                <IconBtn
+                                  label="Move to next day"
+                                  disabled={day >= 14}
+                                  onClick={() => act(item.placeId, "laterDay")}
+                                >
+                                  <ArrowRight className="size-4" />
+                                </IconBtn>
+                                <IconBtn
+                                  label="Remove stop"
+                                  onClick={() => drop(item.placeId)}
+                                >
+                                  <X className="size-4" />
+                                </IconBtn>
+                              </div>
+                            </motion.li>
+                          );
+                        })}
+                      </AnimatePresence>
                     </ul>
                   ) : (
                     <p className="mt-3 rounded-xl border border-dashed border-border px-4 py-3 text-sm text-muted-foreground">
                       Open Discover and add a place straight to Day {day}.
                     </p>
                   )}
-                </div>
+                </motion.div>
               );
             })}
 
@@ -443,11 +556,25 @@ export function TripsView({ onBrowse }: { onBrowse: () => void }) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <AutoPlanDialog
+        open={autoOpen}
+        onOpenChange={setAutoOpen}
+        trip={active}
+        places={places}
+        onGenerated={setActiveId}
+      />
     </div>
   );
 }
 
-function TripsHeader({ onNew }: { onNew: () => void }) {
+function TripsHeader({
+  onNew,
+  onAuto,
+}: {
+  onNew: () => void;
+  onAuto: () => void;
+}) {
   return (
     <div className="flex flex-wrap items-end justify-between gap-4">
       <div>
@@ -455,13 +582,19 @@ function TripsHeader({ onNew }: { onNew: () => void }) {
           My trips
         </h1>
         <p className="mt-1.5 text-sm text-muted-foreground">
-          A day-wise plan built from the places you saved.
+          Auto-plan from your duration and budget, then fine-tune each day.
         </p>
       </div>
-      <Button onClick={onNew}>
-        <Plus className="size-4" />
-        New trip
-      </Button>
+      <div className="flex gap-2">
+        <Button variant="outline" onClick={onAuto}>
+          <Sparkles className="size-4" />
+          Auto-plan
+        </Button>
+        <Button onClick={onNew}>
+          <Plus className="size-4" />
+          New trip
+        </Button>
+      </div>
     </div>
   );
 }

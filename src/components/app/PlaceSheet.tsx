@@ -145,6 +145,8 @@ function PlaceSheetContent({
       <PlaceCover
         category={place.category}
         hiddenGem={place.hiddenGem}
+        image={place.image}
+        alt={place.title}
         className="h-44 w-full"
         iconSize="size-32"
       />
@@ -175,6 +177,11 @@ function PlaceSheetContent({
             <span className="inline-flex items-center gap-1.5 rounded-full border border-border px-2.5 py-1 text-muted-foreground">
               <Wallet className="size-3.5" />
               {budgetLabel(place.budget)}
+              {typeof place.cost === "number"
+                ? place.cost === 0
+                  ? " · free"
+                  : ` · ₹${place.cost}/person`
+                : ""}
             </span>
             {place.bestTime && (
               <span className="inline-flex items-center gap-1.5 rounded-full border border-border px-2.5 py-1 text-muted-foreground">
